@@ -11,8 +11,11 @@ np.set_printoptions(threshold=sys.maxsize) #set full output
 #R&B
 #path = ["Cleaned/R&B/BestPart.mid","Cleaned/R&B/HopelesslyDevotedToYou.mid","Cleaned/R&B/JapaneseDenim.mid","Cleaned/R&B/Misty.mid","Cleaned/R&B/SlowDancingInTheDark.mid"]
 #Slow
-path = ["Cleaned/Slow/All we do.mid","Cleaned/Slow/Apologize.mid","Cleaned/Slow/CityOfStar.mid","Cleaned/Slow/Perfect.mid","Cleaned/Slow/Sad!.mid","Cleaned/Slow/TheScientist.mid"]
+#path = ["Cleaned/Slow/All we do.mid","Cleaned/Slow/Apologize.mid","Cleaned/Slow/CityOfStar.mid","Cleaned/Slow/Perfect.mid","Cleaned/Slow/Sad!.mid","Cleaned/Slow/TheScientist.mid"]
+path = ["pathetique_3.mid"]
+#path  = ["liz_liebestraum.mid_1634823699059.mid"]
 note2 = np.zeros((2304,48)).astype(int) #second markov chain
+note2result = np.zeros((2304,48)).astype(int) #second markov chain of result for similarity
 NOTE_NAMES = {0:"C", 1:"C#", 2:"D", 3:"D#", 4:"E", 5:"F", 6:"F#", 7:"G", 8:"G#", 9:"A", 10:"A#", 11:"B"}
 result =[]
 #add note from midi to list
@@ -31,7 +34,8 @@ for j in range(len(path)):
                     if time>4:
                         time = 4
                     note.append(((msg.note%12)*4+time)-1)
-    print(note)
+    for i in range(100):
+        print(NOTE_NAMES[int(np.floor(note[i]/4))]+str((note[i]%4)+1),end=" ")
     #add note to second markov chain
     for i in range(len(note)-2):
         prevNote2=note[i]
@@ -64,7 +68,7 @@ wb.save('second markov.xls')
 #output song
 result.append(0)
 result.append(8)
-for i in range(100):
+for i in range(2000):
     prevNote2=result[i]
     prevNote1=result[i+1]
     randomtemp=0
@@ -76,9 +80,16 @@ for i in range(100):
             break
         randomtemp=randomtemp-note2[prevNote2*48+prevNote1][j]
     result.append(j)
+    note2result[prevNote2*48+prevNote1][j]+=1
 for i in range(len(result)):
     noteresult=int(np.floor(result[i]/4))
     timeresult=(result[i]%4)+1
     print(NOTE_NAMES[noteresult],end="")
     print(timeresult)
+#cosine similarity
+note2sim=note2.reshape(110592)
+note2resultsim=note2result.reshape(110592)
+similarity_scores = np.dot(note2sim, note2resultsim)/(np.linalg.norm(note2sim)*np.linalg.norm(note2resultsim))
+
+print(similarity_scores)
     
